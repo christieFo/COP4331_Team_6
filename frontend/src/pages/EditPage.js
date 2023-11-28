@@ -2,15 +2,11 @@ import React, { useState } from 'react';
 import '../styles/createPost.css';
 import Header from '../components/Header.js';
 
-
-const urlBase = "http://146.190.175.139:3000";
-const pageRoute = ":3000";
-const backRoute = ":5000";
-
-const CreatePage = () => {
+const EditPage = () => {
 
   var title;
   var content;
+  var post = JSON.parse(localStorage.getItem('edit_post'));
   const [message,setMessage] = useState('');
 
   const [file,setFile] = useState();
@@ -25,18 +21,15 @@ const CreatePage = () => {
 
   }
 
-  const doPost = async event =>{
+  const doEdit = async event =>{
     event.preventDefault();
     var _ud = localStorage.getItem('user_data');
     var ud = JSON.parse(_ud);
     var userID = ud.id;
     var username = ud.username;
   
-    var obj = {
-      title: title.value,
-      content: content.value,
-      author: username
-    };
+    var obj = {id:post.postID,title:title.value,content:content.value,author:username};
+    console.log(obj);
     var js = JSON.stringify(obj);
     
     var err = 0;
@@ -56,23 +49,11 @@ const CreatePage = () => {
     {
       try
       {
-         const response = await fetch('http://localhost:5000/api/post', {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+         const response = await fetch('http://localhost:5000/api/edit', {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
          var res = JSON.parse(await response.text());
          
-         alert("Post \"" + res.title +"\" created!");
-         var obj2 = {author:username};
-        var js2 = JSON.stringify(obj2);
-         try
-         {
-          const response = await fetch('http://localhost:5000/api/myPosts', {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
-          var res = JSON.parse(await response.text());
-          localStorage.setItem('my_posts', JSON.stringify(res.results));
-        }
-        catch (e)
-        {
-          alert(e.toString());
-        }
+         alert("Post \"" + title.value +"\" edited!");
          window.location.href = "/home";
       }
       catch(e)
@@ -92,8 +73,8 @@ const CreatePage = () => {
     
         <div className = "postBox">
         
-         <h1 className ="postBox-title">Create Your Post Here!</h1>   
-        <input className ="create-post-title" type="text" id="title" size={33} placeholder="Title" ref={ (c) => title = c }/>
+         <h1 className ="postBox-title">Edit Your Post Here!</h1>   
+        <input className ="create-post-title" type="text" id="title" size={33} placeholder="Title" defaultValue={post.title} ref={ (c) => title = c }></input>
         <hr />
         <h2 className ="upload-title">Upload Article Image</h2>
         <div className ="image-placeholder">
@@ -103,11 +84,11 @@ const CreatePage = () => {
         </div>
         <input type ="file" className ="upload-image" id="myFile" onChange={showPreview} />
         
-        <textarea className ="create-post-content" id="content" rows={12} cols={36} placeholder="And so your journey begins..." ref={ (c) => content = c }></textarea>
+        <textarea className ="create-post-content" id="content" rows={12} cols={36} placeholder="And so your journey begins..." defaultValue={post.content} ref={ (c) => content = c}></textarea>
         <br />
         <span id="postResult">{message}</span>
         <br />
-        <button className="btn btn-primary" type="button" id="postButton"onClick={doPost}>Post</button>
+        <button className="btn btn-primary" type="button" id="postButton"onClick={doEdit}>Edit</button>
         </div>
         
       </div>
@@ -118,4 +99,4 @@ const CreatePage = () => {
   );
 };
 
-export default CreatePage;
+export default EditPage;
